@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="es-CO" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PriceHunter — Inteligencia de Precios de Ropa Urbana en Colombia</title>
+  <meta name="description" content="Plataforma académica de recolección automatizada, coincidencia de productos y comparación de precios entre Undergold y Clement.">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+              900: '#064e3b',
+              950: '#022c22',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Custom Streetwear Stylesheet -->
+  <link rel="stylesheet" href="/static/css/custom.css">
+</head>
+<body class="bg-mesh min-h-screen text-slate-100 flex flex-col justify-between selection:bg-emerald-500 selection:text-slate-950">
+
+  <!-- ================= TOP HEADER ================= -->
+  <header class="glass-panel sticky top-0 z-40 border-b border-white/5 py-3.5 px-4 sm:px-8">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      
+      <!-- Brand Logo & Tagline -->
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-violet-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+          <i data-lucide="crosshair" class="w-5 h-5 text-slate-950 stroke-[2.5]"></i>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="font-display font-bold text-xl tracking-tight text-white">Price<span class="text-emerald-400">Hunter</span></span>
+            <span class="text-[10px] uppercase font-mono tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold">
+              Proyecto Académico
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 hidden sm:block">Inteligencia de precios para decisiones comerciales más informadas</p>
+        </div>
+      </div>
+
+      <!-- Action Navigation Buttons -->
+      <div class="flex items-center flex-wrap gap-2.5">
+        <!-- History Button -->
+        <button id="open-history-btn" class="px-3 py-1.5 rounded-xl text-xs font-semibold glass-card text-slate-300 hover:text-white hover:border-emerald-500/40 flex items-center space-x-1.5 transition-all">
+          <i data-lucide="history" class="w-4 h-4 text-emerald-400"></i>
+          <span>Historial</span>
+        </button>
+
+        <!-- Manual Entry Button -->
+        <button id="open-manual-btn" class="px-3 py-1.5 rounded-xl text-xs font-semibold glass-card text-slate-300 hover:text-white hover:border-amber-500/40 flex items-center space-x-1.5 transition-all">
+          <i data-lucide="plus-circle" class="w-4 h-4 text-amber-400"></i>
+          <span>Entrada Manual</span>
+        </button>
+
+        <!-- Academic Docs Anchor -->
+        <a href="#academic-section" class="px-3 py-1.5 rounded-xl text-xs font-semibold glass-card text-slate-300 hover:text-white hover:border-violet-500/40 flex items-center space-x-1.5 transition-all">
+          <i data-lucide="book-open" class="w-4 h-4 text-violet-400"></i>
+          <span>Guía Técnica</span>
+        </a>
+
+        <!-- Demo Mode Switch -->
+        <div class="flex items-center space-x-2 pl-2 border-l border-white/10">
+          <span class="text-xs text-slate-300 font-medium">Modo Demo</span>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="demo-mode-toggle" class="sr-only peer">
+            <div class="w-9 h-5 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+          </label>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= DEMO MODE ALERT BANNER (HIDDEN BY DEFAULT) ================= -->
+  <div id="demo-banner" class="hidden bg-blue-950/80 border-b border-blue-500/30 px-4 py-2.5 text-center text-xs text-blue-200">
+    <div class="max-w-5xl mx-auto flex items-center justify-center space-x-2">
+      <i data-lucide="info" class="w-4 h-4 text-blue-400 flex-shrink-0"></i>
+      <span><strong>Modo Demostración Académica Activo:</strong> Las consultas utilizan datos de prendas verificadas pre-cargadas para la sustentación en clase. No se realizan peticiones web externas.</span>
+    </div>
+  </div>
+
+  <!-- ================= MAIN CONTAINER ================= -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-8 py-8 w-full space-y-8">
+    
+    <!-- Hero & Search Box -->
+    <section class="glass-panel rounded-3xl p-6 sm:p-10 shadow-2xl relative overflow-hidden border border-white/10">
+      <div class="max-w-3xl mx-auto text-center space-y-4">
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-zinc-900/90 border border-white/10 text-xs text-slate-300">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          <span>Monitor en Vivo: Undergold & Clement (Clemont)</span>
+        </div>
+        
+        <h1 class="text-3xl sm:text-5xl font-extrabold text-white font-display tracking-tight leading-tight">
+          Compara Precios de <span class="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">Streetwear Colombiano</span>
+        </h1>
+        
+        <p class="text-sm sm:text-base text-slate-400 max-w-2xl mx-auto">
+          Ingresa el estilo o nombre de la camiseta. PriceHunter extrae en tiempo real los catálogos oficiales, normaliza los valores en COP y calcula la brecha competitiva.
+        </p>
+
+        <!-- Search Form -->
+        <form id="search-form" class="mt-8 space-y-4 text-left">
+          <div class="relative flex flex-col sm:flex-row items-center gap-2">
+            <div class="relative w-full">
+              <i data-lucide="search" class="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2"></i>
+              <input 
+                type="text" 
+                id="search-input" 
+                placeholder="Ej: Black oversized T-shirt, Graphic T-shirt, Camiseta blanca..." 
+                class="w-full bg-zinc-950/80 border border-white/15 rounded-2xl py-4 pl-12 pr-4 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 text-sm sm:text-base transition-all shadow-inner"
+                required
+              />
+            </div>
+            
+            <button 
+              type="submit" 
+              id="search-btn"
+              class="w-full sm:w-auto px-8 py-4 rounded-2xl font-bold bg-emerald-500 text-slate-950 hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-500/25 active:scale-95 flex items-center justify-center space-x-2 text-sm sm:text-base flex-shrink-0 cursor-pointer"
+            >
+              <i data-lucide="loader-2" id="search-spinner" class="w-5 h-5 animate-spin hidden"></i>
+              <span id="search-btn-text">Buscar Competidores</span>
+            </button>
+          </div>
+
+          <!-- Competitor Checkboxes & Filter Trigger -->
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-2 text-xs">
+            <div class="flex items-center space-x-4">
+              <span class="text-slate-400 font-medium">Competidores a consultar:</span>
+              <label class="inline-flex items-center space-x-1.5 cursor-pointer">
+                <input type="checkbox" id="check-undergold" checked class="rounded border-zinc-700 bg-zinc-900 text-emerald-500 focus:ring-emerald-500/20">
+                <span class="text-slate-200 font-semibold">Undergold</span>
+              </label>
+              <label class="inline-flex items-center space-x-1.5 cursor-pointer">
+                <input type="checkbox" id="check-clement" checked class="rounded border-zinc-700 bg-zinc-900 text-emerald-500 focus:ring-emerald-500/20">
+                <span class="text-slate-200 font-semibold">Clement (Clemont)</span>
+              </label>
+            </div>
+
+            <button type="button" id="toggle-filters-btn" class="text-slate-400 hover:text-emerald-400 transition-colors flex items-center">
+              <i data-lucide="sliders-horizontal" class="w-4 h-4 mr-1 inline"></i>
+              <span>Filtros avanzados</span>
+            </button>
+          </div>
+
+          <!-- Advanced Filters Panel (Hidden by default) -->
+          <div id="advanced-filters-panel" class="hidden glass-card rounded-2xl p-4 mt-3 border border-white/10 space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Color predominante</label>
+                <input type="text" id="filter-color" placeholder="Ej: Negro, Blanco, Gris..." class="w-full bg-zinc-900 border border-white/10 rounded-xl p-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500">
+              </div>
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Talla requerida</label>
+                <input type="text" id="filter-size" placeholder="Ej: S, M, L, XL..." class="w-full bg-zinc-900 border border-white/10 rounded-xl p-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500">
+              </div>
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Precio Mínimo (COP)</label>
+                <input type="number" id="filter-min-price" placeholder="150000" class="w-full bg-zinc-900 border border-white/10 rounded-xl p-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500">
+              </div>
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Precio Máximo (COP)</label>
+                <input type="number" id="filter-max-price" placeholder="450000" class="w-full bg-zinc-900 border border-white/10 rounded-xl p-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500">
+              </div>
+            </div>
+            <div class="flex items-center justify-between pt-2 border-t border-white/5">
+              <label class="inline-flex items-center space-x-2 text-xs text-slate-300 cursor-pointer">
+                <input type="checkbox" id="filter-stock" class="rounded border-zinc-700 bg-zinc-900 text-emerald-500">
+                <span>Mostrar solo prendas con stock disponible</span>
+              </label>
+              <button type="button" id="clear-filters-btn" class="text-xs text-slate-400 hover:text-rose-400 transition-colors">
+                Limpiar filtros
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <!-- Quick Suggestion Chips -->
+        <div class="pt-2 flex flex-wrap items-center justify-center gap-2 text-xs text-slate-400">
+          <span class="mr-1">Sugerencias:</span>
+          <button type="button" class="suggestion-chip px-3 py-1 rounded-full bg-zinc-900/90 hover:bg-zinc-800 text-slate-300 border border-white/5 transition-colors" data-query="Black oversized T-shirt">
+            Black oversized T-shirt
+          </button>
+          <button type="button" class="suggestion-chip px-3 py-1 rounded-full bg-zinc-900/90 hover:bg-zinc-800 text-slate-300 border border-white/5 transition-colors" data-query="Graphic T-shirt">
+            Graphic T-shirt
+          </button>
+          <button type="button" class="suggestion-chip px-3 py-1 rounded-full bg-zinc-900/90 hover:bg-zinc-800 text-slate-300 border border-white/5 transition-colors" data-query="Camiseta blanca">
+            Camiseta blanca
+          </button>
+          <button type="button" class="suggestion-chip px-3 py-1 rounded-full bg-zinc-900/90 hover:bg-zinc-800 text-slate-300 border border-white/5 transition-colors" data-query="Agnus Dei">
+            Agnus Dei
+          </button>
+          <button type="button" class="suggestion-chip px-3 py-1 rounded-full bg-zinc-900/90 hover:bg-zinc-800 text-slate-300 border border-white/5 transition-colors" data-query="Saggezza">
+            Saggezza
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Real-Time Competitor Health Strip -->
+    <section>
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-xs uppercase tracking-wider font-mono font-bold text-slate-400">Estado de Adaptadores de Tiendas Oficiales</h2>
+        <span class="text-[11px] text-slate-500">Monitoreo activo HTTP</span>
+      </div>
+      <div id="competitors-status-strip" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- Rendered dynamically -->
+        <div class="glass-card rounded-xl p-3 flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
+            <div>
+              <span class="font-semibold text-white text-sm">Undergold</span>
+              <p class="text-xs text-slate-400">Tienda oficial: undergoldapparel.com</p>
+            </div>
+          </div>
+          <span class="text-xs px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">Listo</span>
+        </div>
+
+        <div class="glass-card rounded-xl p-3 flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
+            <div>
+              <span class="font-semibold text-white text-sm">Clement (Clemont)</span>
+              <p class="text-xs text-slate-400">Tienda oficial: clemont.co</p>
+            </div>
+          </div>
+          <span class="text-xs px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium">Listo</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Summary Metrics Dashboard (Hidden until search is executed) -->
+    <section id="summary-section" class="hidden space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xs uppercase tracking-wider font-mono font-bold text-slate-400">Tablero Comparativo de Mercado</h2>
+        <span class="text-xs text-emerald-400 font-medium">Precios en Pesos Colombianos (COP)</span>
+      </div>
+
+      <!-- 5 Metric Cards -->
+      <div class="grid grid-cols-2 lg:grid-cols-5 gap-3.5">
+        <!-- Lowest Price -->
+        <div class="glass-card rounded-2xl p-4 border-l-4 border-l-emerald-500">
+          <div class="flex items-center justify-between text-slate-400 text-xs mb-1">
+            <span>Precio Mínimo</span>
+            <i data-lucide="trending-down" class="w-4 h-4 text-emerald-400"></i>
+          </div>
+          <p id="stat-lowest-price" class="text-xl sm:text-2xl font-extrabold text-white font-display tracking-tight">$ 0 COP</p>
+          <p id="stat-lowest-product" class="text-[11px] text-slate-400 truncate mt-1">N/D</p>
+        </div>
+
+        <!-- Highest Price -->
+        <div class="glass-card rounded-2xl p-4 border-l-4 border-l-rose-500">
+          <div class="flex items-center justify-between text-slate-400 text-xs mb-1">
+            <span>Precio Máximo</span>
+            <i data-lucide="trending-up" class="w-4 h-4 text-rose-400"></i>
+          </div>
+          <p id="stat-highest-price" class="text-xl sm:text-2xl font-extrabold text-white font-display tracking-tight">$ 0 COP</p>
+          <p id="stat-highest-product" class="text-[11px] text-slate-400 truncate mt-1">N/D</p>
+        </div>
+
+        <!-- Average Price -->
+        <div class="glass-card rounded-2xl p-4 border-l-4 border-l-blue-500">
+          <div class="flex items-center justify-between text-slate-400 text-xs mb-1">
+            <span>Precio Promedio</span>
+            <i data-lucide="calculator" class="w-4 h-4 text-blue-400"></i>
+          </div>
+          <p id="stat-avg-price" class="text-xl sm:text-2xl font-extrabold text-white font-display tracking-tight">$ 0 COP</p>
+          <p class="text-[11px] text-slate-400 mt-1">Catálogo analizado</p>
+        </div>
+
+        <!-- Price Gap -->
+        <div class="glass-card rounded-2xl p-4 border-l-4 border-l-amber-500">
+          <div class="flex items-center justify-between text-slate-400 text-xs mb-1">
+            <span>Brecha de Entrada</span>
+            <i data-lucide="percent" class="w-4 h-4 text-amber-400"></i>
+          </div>
+          <p id="stat-price-diff" class="text-xl sm:text-2xl font-extrabold text-white font-display tracking-tight">0%</p>
+          <p class="text-[11px] text-slate-400 mt-1">Diferencia entre marcas</p>
+        </div>
+
+        <!-- Total Products -->
+        <div class="glass-card rounded-2xl p-4 border-l-4 border-l-violet-500 col-span-2 lg:col-span-1">
+          <div class="flex items-center justify-between text-slate-400 text-xs mb-1">
+            <span>Prendas Encontradas</span>
+            <i data-lucide="layers" class="w-4 h-4 text-violet-400"></i>
+          </div>
+          <p id="stat-total-prods" class="text-xl sm:text-2xl font-extrabold text-white font-display tracking-tight">0</p>
+          <p class="text-[11px] text-slate-400 mt-1">Ambas marcas</p>
+        </div>
+      </div>
+
+      <!-- Verdict Box -->
+      <div id="verdict-banner" class="glass-card rounded-2xl p-5 border-l-4 border-l-emerald-500 bg-emerald-950/20">
+        <div class="flex items-start space-x-3">
+          <i data-lucide="award" class="w-5 h-5 text-emerald-400 mt-0.5 flex-shrink-0"></i>
+          <div>
+            <h3 class="font-bold text-white text-sm">Dictamen de Inteligencia de Precios</h3>
+            <p id="verdict-text" class="text-xs sm:text-sm text-slate-300 mt-1 leading-relaxed">
+              Analizando...
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Results Section -->
+    <section id="results-section" class="hidden space-y-4">
+      <!-- Toolbar -->
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 glass-panel rounded-2xl p-4">
+        <div>
+          <div class="flex items-center space-x-2">
+            <h2 class="font-bold text-white text-base">Resultados de Prendas</h2>
+            <span id="results-count" class="text-xs px-2.5 py-0.5 rounded-full bg-zinc-800 text-slate-300 font-mono">0 productos</span>
+          </div>
+          <p id="freshness-timestamp" class="text-xs text-slate-400 mt-0.5">Actualizado hace un momento</p>
+        </div>
+
+        <!-- Controls: Filters, Sorter, View Switch, Export -->
+        <div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+          <!-- Competitor filter -->
+          <select id="brand-filter-select" class="bg-zinc-900 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-emerald-500">
+            <option value="all">Todas las marcas</option>
+            <option value="Undergold">Solo Undergold</option>
+            <option value="Clement">Solo Clement</option>
+          </select>
+
+          <!-- Confidence filter -->
+          <select id="confidence-filter-select" class="bg-zinc-900 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-emerald-500">
+            <option value="all">Toda confianza</option>
+            <option value="ALTA">Alta coincidencia</option>
+            <option value="MEDIA">Coincidencia media</option>
+            <option value="BAJA">Baja coincidencia</option>
+          </select>
+
+          <!-- Sort dropdown -->
+          <select id="sort-select" class="bg-zinc-900 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-emerald-500">
+            <option value="confidence">Mayor coincidencia</option>
+            <option value="price_asc">Menor a mayor precio</option>
+            <option value="price_desc">Mayor a menor precio</option>
+            <option value="title">Nombre alfabético</option>
+          </select>
+
+          <!-- View Switcher -->
+          <div class="flex items-center rounded-xl bg-zinc-900 p-0.5 border border-white/10">
+            <button id="view-cards-btn" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500 text-slate-950 flex items-center space-x-1.5 transition-all">
+              <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
+              <span class="hidden sm:inline">Tarjetas</span>
+            </button>
+            <button id="view-table-btn" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-transparent text-slate-400 hover:text-white flex items-center space-x-1.5 transition-all">
+              <i data-lucide="table" class="w-3.5 h-3.5"></i>
+              <span class="hidden sm:inline">Tabla</span>
+            </button>
+          </div>
+
+          <!-- Export CSV -->
+          <button id="export-csv-btn" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-zinc-800 hover:bg-zinc-700 text-slate-200 border border-white/10 flex items-center space-x-1.5 transition-all active:scale-95">
+            <i data-lucide="download" class="w-3.5 h-3.5 text-emerald-400"></i>
+            <span>Exportar CSV</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Product Cards Container -->
+      <div id="cards-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        <!-- Injected dynamically -->
+      </div>
+
+      <!-- Product Table Container -->
+      <div id="table-container" class="hidden glass-panel rounded-2xl overflow-hidden border border-white/10 overflow-x-auto">
+        <table class="w-full text-left border-collapse min-w-[700px]">
+          <thead>
+            <tr class="border-b border-white/10 bg-zinc-950/50 text-[11px] font-mono uppercase tracking-wider text-slate-400">
+              <th class="py-3 px-4 text-center">Rank</th>
+              <th class="py-3 px-4">Producto</th>
+              <th class="py-3 px-4">Competidor</th>
+              <th class="py-3 px-4">Precio Actual</th>
+              <th class="py-3 px-4">Precio Orig.</th>
+              <th class="py-3 px-4">Disponibilidad</th>
+              <th class="py-3 px-4">Coincidencia</th>
+              <th class="py-3 px-4">Fuente</th>
+              <th class="py-3 px-4 text-right">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="products-table-body" class="text-xs divide-y divide-white/5">
+            <!-- Injected dynamically -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty State -->
+      <div id="empty-state" class="hidden glass-card rounded-2xl p-12 text-center space-y-3">
+        <i data-lucide="search-x" class="w-12 h-12 text-slate-500 mx-auto"></i>
+        <h3 class="text-lg font-bold text-white">No se hallaron resultados para esta búsqueda</h3>
+        <p id="empty-message" class="text-sm text-slate-400 max-w-md mx-auto">
+          Intenta con términos más generales como "camiseta", "t-shirt", "oversized" o cambia los filtros de color y precio.
+        </p>
+      </div>
+    </section>
+
+    <!-- ================= ACADEMIC GUIDE & METHODOLOGY SECTION ================= -->
+    <section id="academic-section" class="glass-panel rounded-3xl p-6 sm:p-10 border border-white/10 space-y-6">
+      <div class="border-b border-white/10 pb-4">
+        <div class="inline-flex items-center space-x-2 text-xs font-mono text-violet-400 uppercase tracking-wider mb-1">
+          <i data-lucide="graduation-cap" class="w-4 h-4"></i>
+          <span>Documentación Académica del Proyecto Universitario</span>
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-white font-display">
+          Fundamentos Técnicos y Metodología de Inteligencia de Precios
+        </h2>
+        <p class="text-sm text-slate-400 mt-1">
+          Explicación rigurosa sobre recolección automatizada, backend seguro, algoritmos de matching, ética y limitaciones técnicas.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs sm:text-sm text-slate-300">
+        
+        <!-- 1. What is Web Scraping -->
+        <div class="glass-card rounded-2xl p-5 space-y-2 border-l-4 border-l-emerald-500">
+          <h3 class="font-bold text-white text-base flex items-center space-x-2">
+            <i data-lucide="globe" class="w-4 h-4 text-emerald-400"></i>
+            <span>1. ¿Qué es Web Scraping y para qué sirve?</span>
+          </h3>
+          <p class="leading-relaxed text-slate-300">
+            El <strong>Web Scraping</strong> es la técnica computacional orientada a extraer datos de sitios web de manera programática y estructurada. En el comercio electrónico de moda, permite a una tienda monitorear la dinámica de precios, lanzamientos de colecciones y niveles de inventario de competidores líderes para ajustar sus propias estrategias comerciales con datos verídicos.
+          </p>
+        </div>
+
+        <!-- 2. Why Backend is Required -->
+        <div class="glass-card rounded-2xl p-5 space-y-2 border-l-4 border-l-blue-500">
+          <h3 class="font-bold text-white text-base flex items-center space-x-2">
+            <i data-lucide="server" class="w-4 h-4 text-blue-400"></i>
+            <span>2. ¿Por qué es indispensable una arquitectura Backend?</span>
+          </h3>
+          <p class="leading-relaxed text-slate-300">
+            Un navegador frontend no puede realizar scraping directo debido a las políticas de seguridad del mismo origen (<strong>CORS</strong>), expondría la lógica interna y credenciales, y no puede gestionar sesiones concurrentes ni reintentos. El backend en <strong>Python (FastAPI)</strong> centraliza las peticiones HTTP, respeta encabezados legítimos, parsea el DOM/JSON y almacena historiales en base de datos.
+          </p>
+        </div>
+
+        <!-- 3. Retrieval & Parsing Flow -->
+        <div class="glass-card rounded-2xl p-5 space-y-2 border-l-4 border-l-violet-500">
+          <h3 class="font-bold text-white text-base flex items-center space-x-2">
+            <i data-lucide="workflow" class="w-4 h-4 text-violet-400"></i>
+            <span>3. Flujo de Extracción y Adaptadores Modulares</span>
+          </h3>
+          <p class="leading-relaxed text-slate-300">
+            PriceHunter implementa el patrón <strong>Adapter</strong> independiente para cada marca (<code class="text-emerald-300">UndergoldAdapter</code> y <code class="text-emerald-300">ClementAdapter</code>). Si una tienda modifica su estructura HTML o API interna, solo se actualiza su adaptador aislado sin afectar el resto de la plataforma ni la operatividad del otro competidor.
+          </p>
+        </div>
+
+        <!-- 4. Matching Algorithm -->
+        <div class="glass-card rounded-2xl p-5 space-y-2 border-l-4 border-l-amber-500">
+          <h3 class="font-bold text-white text-base flex items-center space-x-2">
+            <i data-lucide="cpu" class="w-4 h-4 text-amber-400"></i>
+            <span>4. Algoritmo de Coincidencia (Fuzzy Matching)</span>
+          </h3>
+          <p class="leading-relaxed text-slate-300">
+            Se aplica normalización léxica (eliminación de acentos diacríticos, mapeo de sinónimos urbanos: <em>t-shirt = camiseta</em>, <em>oversized = holgada</em>). La similitud se calcula mediante una combinación ponderada de <strong>Token Set Ratio</strong> (distancia de Levenshtein robusta al orden de palabras) y <strong>Jaccard Keyword Overlap</strong>, generando niveles de confianza transparentes (<span class="text-emerald-400 font-semibold">Alta</span>, <span class="text-amber-400 font-semibold">Media</span>, <span class="text-rose-400 font-semibold">Baja</span>).
+          </p>
+        </div>
+
+        <!-- 5. Honest Fallback & Provenance -->
+        <div class="glass-card rounded-2xl p-5 space-y-2 border-l-4 border-l-cyan-500">
+          <h3 class="font-bold text-white text-base flex items-center space-x-2">
+            <i data-lucide="shield-check" class="w-4 h-4 text-cyan-400"></i>
+            <span>5. Integridad de Datos: En Vivo vs Demostración</span>
+          </h3>
+          <p class="leading-relaxed text-slate-300">
+            La plataforma garantiza <strong>honestidad algorítmica estricta</strong>: nunca reemplaza de forma encubierta un fallo de conexión con datos ficticios. Cada registro indica explícitamente su procedencia (<span class="text-emerald-400">En Vivo</span>, <span class="text-blue-400">Demostración</span> o <span class="text-amber-400">Entrada Manual</span>). Si un competidor falla, se informa el motivo exacto y se ofrece el enlace oficial.
+          </p>
+        </div>
+
+        <!-- 6. Ethics & Limitations -->
+        <div class="glass-card rounded-2xl p-5 space-y-2 border-l-4 border-l-rose-500">
+          <h3 class="font-bold text-white text-base flex items-center space-x-2">
+            <i data-lucide="alert-circle" class="w-4 h-4 text-rose-400"></i>
+            <span>6. Ética, robots.txt y Limitaciones Técnicas</span>
+          </h3>
+          <p class="leading-relaxed text-slate-300">
+            PriceHunter no elude controles de acceso ni CAPTCHAs, respeta intervalos de petición razonables mediante timeouts y consultas acotadas. Las limitaciones del mundo real incluyen cambios en selectores CSS, protección anti-bot perimetral (Cloudflare) y divergencia en tallas o composición textil de cada fabricante.
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= MODALS ================= -->
+
+  <!-- 1. History Modal -->
+  <div id="history-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div class="glass-panel w-full max-w-2xl rounded-3xl p-6 border border-white/10 space-y-4 max-h-[85vh] flex flex-col">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="history" class="w-5 h-5 text-emerald-400"></i>
+          <h3 class="font-bold text-white text-base">Historial de Búsquedas Previas</h3>
+        </div>
+        <button id="close-history-btn" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div id="history-list" class="space-y-2 overflow-y-auto flex-1 pr-1">
+        <!-- Injected dynamically -->
+      </div>
+
+      <div class="pt-3 border-t border-white/10 flex items-center justify-between">
+        <button id="clear-history-btn" class="text-xs text-rose-400 hover:underline">
+          Vaciar historial completo
+        </button>
+        <span class="text-xs text-slate-500">Haz clic en cualquier búsqueda para recargarla</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Manual Product Entry Modal -->
+  <div id="manual-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div class="glass-panel w-full max-w-lg rounded-3xl p-6 border border-white/10 space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="plus-circle" class="w-5 h-5 text-amber-400"></i>
+          <h3 class="font-bold text-white text-base">Registrar Entrada Manual de Prenda</h3>
+        </div>
+        <button id="close-manual-btn" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="manual-form" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1">Término de búsqueda asociado</label>
+          <input type="text" id="manual-query" required class="w-full bg-zinc-900 border border-white/10 rounded-xl p-2.5 text-white">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 mb-1">Tienda Competidora</label>
+            <select id="manual-competitor" class="w-full bg-zinc-900 border border-white/10 rounded-xl p-2.5 text-white">
+              <option value="Undergold">Undergold</option>
+              <option value="Clement">Clement</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Precio Actual (COP)</label>
+            <input type="number" id="manual-price" required placeholder="Ej: 240000" class="w-full bg-zinc-900 border border-white/10 rounded-xl p-2.5 text-white">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-400 mb-1">Nombre o Título de la Prenda</label>
+          <input type="text" id="manual-title" required placeholder="Ej: Camiseta Oversized Negra" class="w-full bg-zinc-900 border border-white/10 rounded-xl p-2.5 text-white">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-400 mb-1">Precio Original (Opcional)</label>
+            <input type="number" id="manual-orig-price" placeholder="Ej: 280000" class="w-full bg-zinc-900 border border-white/10 rounded-xl p-2.5 text-white">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Color</label>
+            <input type="text" id="manual-color" placeholder="Ej: Negro" class="w-full bg-zinc-900 border border-white/10 rounded-xl p-2.5 text-white">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-400 mb-1">Tallas disponibles (separadas por coma)</label>
+          <input type="text" id="manual-sizes" placeholder="S, M, L, XL" class="w-full bg-zinc-900 border border-white/10 rounded-xl p-2.5 text-white">
+        </div>
+
+        <div>
+          <label class="block text-slate-400 mb-1">URL Oficial de la Prenda</label>
+          <input type="url" id="manual-url" required placeholder="https://..." class="w-full bg-zinc-900 border border-white/10 rounded-xl p-2.5 text-white">
+        </div>
+
+        <div class="pt-3 flex justify-end space-x-2">
+          <button type="button" onclick="document.getElementById('manual-modal').classList.add('hidden')" class="px-4 py-2 rounded-xl bg-zinc-800 text-slate-300">
+            Cancelar
+          </button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-amber-500 text-slate-950 font-bold hover:bg-amber-400 transition-colors">
+            Guardar Prenda
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= PROFESSIONAL FOOTER ================= -->
+  <footer class="border-t border-white/5 py-8 px-4 sm:px-8 mt-12 text-xs text-slate-500 glass-panel">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <div>
+        <p class="text-slate-300 font-semibold">PriceHunter — Plataforma Automatizada de Inteligencia de Precios</p>
+        <p class="mt-0.5">Proyecto Académico Universitario • Asignatura de Comercio Electrónico & Web Scraping • Colombia 2026</p>
+      </div>
+      <div class="flex items-center space-x-4">
+        <span>Fuentes Oficiales: Undergold & Clement</span>
+        <span>•</span>
+        <span>FastAPI + Tailwind CSS + RapidFuzz</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
